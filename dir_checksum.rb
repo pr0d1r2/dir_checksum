@@ -13,7 +13,11 @@ else
 end
 
 def md5(file)
-  `#{@md5cmd} '#{file}' | cut -b1-32`.strip
+  if file.include?("'")
+    `#{@md5cmd} "#{file}" | cut -b1-32`.strip
+  else
+    `#{@md5cmd} '#{file}' | cut -b1-32`.strip
+  end
 end
 
 ARGV.each do |dir|
