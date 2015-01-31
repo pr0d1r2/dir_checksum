@@ -1,10 +1,20 @@
 #!/usr/bin/env ruby
 
 require 'yaml'
-require 'digest/md5'
 require 'fileutils'
 
 start_dir = Dir.pwd
+
+case `uname`
+when 'Darwin'
+  @md5cmd = 'md5'
+else
+  @md5cmd = 'md5sum'
+end
+
+def md5(file)
+  `#{@md5cmd} '#{file}' | cut -b1-32`.strip
+end
 
 ARGV.each do |dir|
   checksum_file = "#{dir}.dir_checksum.yml"
@@ -48,7 +58,7 @@ ARGV.each do |dir|
             [
               file, {
                 "size" => File.size(file),
-                "md5sum" => Digest::MD5.hexdigest(File.read(file))
+                "md5sum" => md5(file)
               }
             ]
           end
