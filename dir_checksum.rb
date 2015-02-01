@@ -20,7 +20,26 @@ def md5(file)
   end
 end
 
-ARGV.each do |dir|
+def proper_suffix?(file)
+  @exclude_suffixes.each do |suffix|
+    return false if file[-suffix.size..-1] == suffix
+  end
+  true
+end
+
+dirs = []
+@exclude_suffixes = []
+ARGV.each do |arg|
+  if File.directory?(arg)
+    dirs << arg
+  else
+    if arg.include?('--exclude-suffix=') || arg.include?('-S=')
+      @exclude_suffixes << arg.split('=').last
+    end
+  end
+end
+
+dirs.each do |dir|
   checksum_file = "#{dir}.dir_checksum.yml"
   checksum_file_ok = "#{dir}.dir_checksum.ok"
   if File.file?(checksum_file)
@@ -57,14 +76,18 @@ ARGV.each do |dir|
       Dir.chdir(dir)
       dir_data = Hash[
         Dir.glob("**/*").map do |file|
-          puts file
           if File.file?(file)
-            [
-              file, {
-                "size" => File.size(file),
-                "md5sum" => md5(file)
-              }
-            ]
+            if proper_suffix?(file)
+              puts file
+              [
+                file, {
+                  "size" => File.size(file),
+                  "md5sum" => md5(file)
+                }
+              ]
+            else
+              puts "#{file} SKIPPED DUE TO SUFFIX"
+            end
           end
         end
       ]
