@@ -40,7 +40,7 @@ ARGV.each do |dir|
           end
         end
         dir_data.each do |file,data|
-          if Digest::MD5.hexdigest(File.read(file)) == data["md5sum"]
+          if md5(file) == data["md5sum"]
             puts "#{file} [md5sum OK]"
           else
             puts "#{file} [md5sum BAD]"
